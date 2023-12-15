@@ -1,6 +1,8 @@
 import dlt
 from dlt.sources.helpers import requests
 
+import duckdb
+
 # Create a dlt pipeline that will load
 
 # chess player data to the DuckDB destination
@@ -20,5 +22,34 @@ for player in ['magnuscarlsen', 'rpragchess']:
     response.raise_for_status()
     data.append(response.json())
 
-for i in data:
-    print(i)
+load_info = pipeline.run(data, table_name='player')
+
+#print(load_info)
+
+conn = duckdb.connect(f"{pipeline.pipeline_name}.duckdb")
+
+# this lets us query data without adding schema prefix to table names
+conn.sql(f"SET search_path = '{pipeline.dataset_name}'")
+
+# list all tables
+#print(conn.sql("DESCRIBE"))
+
+stats_table = conn.sql("SELECT * FROM player").df()
+print(stats_table)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
